@@ -62,23 +62,12 @@ namespace AuthandProductCRUD.Controllers
 
         private string GenerateJwtToken(User user)
         {
-            if (user == null || string.IsNullOrEmpty(user.Username))
-            {
-                throw new ArgumentException("Username is required to generate token.");
-            }
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, user.Username ?? throw new ArgumentException("Username cannot be null")),
+            var claims = new[] {
+                new Claim(ClaimTypes.Name, user.Username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var secretKey = _configuration["Jwt:Key"];
-            if (string.IsNullOrEmpty(secretKey))
-            {
-                throw new InvalidOperationException("SecretKey is not configured.");
-            }
-
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

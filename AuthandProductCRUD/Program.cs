@@ -1,7 +1,7 @@
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using AuthandProductCRUD.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using AuthandProductCRUD.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 // Register MongoDB service
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<ProductService>(); // Register ProductService
 
 // Add Authentication services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -40,8 +41,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); // Enable authentication
+app.UseAuthorization(); // Enable authorization
 
 app.MapControllers();
 
