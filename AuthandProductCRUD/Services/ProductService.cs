@@ -1,5 +1,6 @@
 ﻿using AuthandProductCRUD.Model;
 using MongoDB.Driver;
+using Microsoft.Extensions.Configuration;
 
 namespace AuthandProductCRUD.Services
 {
@@ -18,8 +19,7 @@ namespace AuthandProductCRUD.Services
         public List<Product> GetAll() => _products.Find(_ => true).ToList();
         public Product GetById(string id) => _products.Find(p => p.Id == id).FirstOrDefault();
         public void Create(Product product) => _products.InsertOne(product);
-        public void Update(string id, Product productIn) =>
-            _products.ReplaceOne(p => p.Id == id, productIn);
+        public void Update(string id, Product productIn) => _products.ReplaceOne(p => p.Id == id, productIn);
         public void Delete(string id) => _products.DeleteOne(p => p.Id == id);
     }
 }

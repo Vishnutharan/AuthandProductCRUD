@@ -40,7 +40,7 @@ namespace AuthandProductCRUD.Controllers
             return Ok("User registered successfully.");
         }
 
-        // Login User and generate JWT token
+        // Login User and generate JWT token with roles
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel loginModel)
         {
@@ -62,9 +62,11 @@ namespace AuthandProductCRUD.Controllers
 
         private string GenerateJwtToken(User user)
         {
+            // Add roles as claims. This can be extended to include more roles or permissions
             var claims = new[] {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, user.Role) // Assuming 'Role' field exists in User model
             };
 
             var secretKey = _configuration["Jwt:Key"];

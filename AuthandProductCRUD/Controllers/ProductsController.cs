@@ -2,38 +2,41 @@
 using AuthandProductCRUD.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 using System.Security.Claims;
 
 namespace AuthandProductCRUD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize] // This ensures that the user is authenticated
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
 
         public ProductController(ProductService productService)
         {
-            _productService = productService;
+            _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         }
 
-        // Get All - for authenticated users
+        // Get All - accessible for all authenticated users
         [HttpGet]
         public ActionResult<List<Product>> GetAll() => _productService.GetAll();
 
-        // Get by ID - for authenticated users
+        // Get by ID - accessible for all authenticated users
         [HttpGet("{id}")]
-        public ActionResult<Product> Get(string id)
+        public ActionResult<Product> GetProductById(string id)
         {
             var product = _productService.GetById(id);
-            return product == null ? NotFound() : product;
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return product;
         }
 
         // Create - Admin only
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]  // Only Admin can create products
         public IActionResult Create([FromBody] Product product)
         {
             var userId = GetUserIdFromToken();
@@ -44,25 +47,31 @@ namespace AuthandProductCRUD.Controllers
 
         // Update - Admin only
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]  // Only Admin can update products
         public IActionResult Update(string id, [FromBody] Product productIn)
         {
-            var existing = _productService.GetById(id);
-            if (existing == null) return NotFound();
+            var existingProduct = _productService.GetById(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
 
             productIn.Id = id;
-            productIn.UserId = GetUserIdFromToken(); // Optionally update user
+            productIn.UserId = GetUserIdFromToken();  // Optionally update user
             _productService.Update(id, productIn);
             return Ok("Product updated.");
         }
 
         // Delete - Admin only
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]  // Only Admin can delete products
         public IActionResult Delete(string id)
         {
             var product = _productService.GetById(id);
-            if (product == null) return NotFound();
+            if (product == null)
+            {
+                return NotFound();
+            }
 
             _productService.Delete(id);
             return Ok("Product deleted.");
@@ -73,10 +82,8 @@ namespace AuthandProductCRUD.Controllers
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var userName = identity?.FindFirst(ClaimTypes.Name)?.Value;
 
-            // You need a service to get user ID from username
-            // Example:
             var userService = HttpContext.RequestServices.GetRequiredService<UserService>();
-            var user = userService.GetUser(userName, null); // password null if not needed
+            var user = userService.GetUser(userName, null);  // password null if not needed
             return user?.Id ?? string.Empty;
         }
     }
