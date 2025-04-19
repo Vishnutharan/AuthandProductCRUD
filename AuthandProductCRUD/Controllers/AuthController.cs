@@ -21,7 +21,6 @@ namespace AuthandProductCRUD.Controllers
             _userService = userService;
         }
 
-        // Register User
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
@@ -30,17 +29,16 @@ namespace AuthandProductCRUD.Controllers
                 return BadRequest("Invalid user data.");
             }
 
-            var existingUser = _userService.GetUser(user.Username, user.Password);
+            var existingUser = _userService.GetUserByUsername(user.Username);
             if (existingUser != null)
             {
-                return BadRequest("User already exists.");
+                return BadRequest("Username already exists.");
             }
 
             _userService.AddUser(user);
             return Ok("User registered successfully.");
         }
 
-        // Login User and generate JWT token with roles
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel loginModel)
         {
@@ -62,11 +60,10 @@ namespace AuthandProductCRUD.Controllers
 
         private string GenerateJwtToken(User user)
         {
-            // Add roles as claims. This can be extended to include more roles or permissions
             var claims = new[] {
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, user.Role) // Assuming 'Role' field exists in User model
+                new Claim(ClaimTypes.Role, user.Role) 
             };
 
             var secretKey = _configuration["Jwt:Key"];

@@ -8,7 +8,7 @@ namespace AuthandProductCRUD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // This ensures that the user is authenticated
+    [Authorize] 
     public class ProductController : ControllerBase
     {
         private readonly ProductService _productService;
@@ -18,11 +18,9 @@ namespace AuthandProductCRUD.Controllers
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         }
 
-        // Get All - accessible for all authenticated users
         [HttpGet]
         public ActionResult<List<Product>> GetAll() => _productService.GetAll();
 
-        // Get by ID - accessible for all authenticated users
         [HttpGet("{id}")]
         public ActionResult<Product> GetProductById(string id)
         {
@@ -34,9 +32,8 @@ namespace AuthandProductCRUD.Controllers
             return product;
         }
 
-        // Create - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]  // Only Admin can create products
+        [Authorize(Roles = "Admin")]  
         public IActionResult Create([FromBody] Product product)
         {
             var userId = GetUserIdFromToken();
@@ -45,9 +42,8 @@ namespace AuthandProductCRUD.Controllers
             return Ok("Product created successfully.");
         }
 
-        // Update - Admin only
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]  // Only Admin can update products
+        [Authorize(Roles = "Admin")]  
         public IActionResult Update(string id, [FromBody] Product productIn)
         {
             var existingProduct = _productService.GetById(id);
@@ -57,14 +53,13 @@ namespace AuthandProductCRUD.Controllers
             }
 
             productIn.Id = id;
-            productIn.UserId = GetUserIdFromToken();  // Optionally update user
+            productIn.UserId = GetUserIdFromToken();  
             _productService.Update(id, productIn);
             return Ok("Product updated.");
         }
 
-        // Delete - Admin only
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]  // Only Admin can delete products
+        [Authorize(Roles = "Admin")]  
         public IActionResult Delete(string id)
         {
             var product = _productService.GetById(id);

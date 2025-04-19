@@ -15,16 +15,19 @@ namespace AuthandProductCRUD.Services
             _users = database.GetCollection<User>("Users");
         }
 
-        // Get user by username and password
         public User GetUser(string username, string password)
         {
             return _users.Find(u => u.Username == username && u.Password == password).FirstOrDefault();
         }
 
-        // Add new user to the database
         public void AddUser(User user)
         {
             _users.InsertOne(user);
+        }
+
+        public User GetUserByUsername(string username)
+        {
+            return _users.Find(u => u.Username == username).FirstOrDefault();
         }
     }
 }
